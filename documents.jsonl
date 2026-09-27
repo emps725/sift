@@ -1,0 +1,13 @@
+{"id":"rust","title":"Rust search","body":"Rust makes systems programming productive and reliable."}
+{"id":"bm25","title":"Ranking with BM25","body":"BM25 ranks documents using term frequency and document frequency."}
+{"id":"query","title":"Query processing","body":"A search query can contain an exact phrase."}
+{"id":"crawler","title":"Web Crawling","body":"A web crawler visits webpages, extracts useful content, and follows links to discover additional pages."}
+{"id":"index","title":"Inverted Index","body":"An inverted index maps terms to the documents in which those terms appear."}
+{"id":"tokenization","title":"Text Tokenization","body":"Tokenization breaks text into individual words or tokens that can be processed by a search engine."}
+{"id":"ranking","title":"Search Ranking","body":"Search ranking determines the order in which documents are presented based on their relevance to a query."}
+{"id":"tfidf","title":"TF-IDF","body":"TF-IDF measures how important a term is to a document relative to the collection of documents."}
+{"id":"search","title":"Search Engine","body":"A search engine retrieves and ranks relevant documents in response to a user's search query."}
+{"id":"stemming","title":"Word Stemming","body":"Stemming reduces related words to a common root form to improve search matching."}
+{"id":"phrase","title":"Phrase Search","body":"Phrase search finds documents containing multiple words in a specific order as an exact phrase."}
+{"id":"indexing","title":"Document Indexing","body":"Indexing processes documents and stores information that allows search queries to be answered efficiently."}
+{"id":"relevance","title":"Search Relevance","body":"Search relevanument matches the intent and terms of a user's query."}

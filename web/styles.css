@@ -1,0 +1,256 @@
+@import url("https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Playfair+Display:ital,wght@0,600;1,600;1,700&family=Space+Grotesk:wght@400;500;600&display=swap");
+
+:root {
+  --ink: #17201c;
+  --muted: #68736c;
+  --paper: #f4f1e9;
+  --card: #fbfaf6;
+  --line: #d8d8cc;
+  --accent: #e5643e;
+  --green: #335b4b;
+}
+* {
+  box-sizing: border-box;
+}
+body {
+  margin: 0;
+  color: var(--ink);
+  background: var(--paper);
+  font-family: "Space Grotesk", sans-serif;
+}
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.24;
+  background-image: radial-gradient(#9c9e91 0.7px, transparent 0.7px);
+  background-size: 13px 13px;
+}
+.shell {
+  position: relative;
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 64px 32px 88px;
+}
+.masthead {
+  max-width: 720px;
+  border-left: 3px solid var(--accent);
+  padding-left: 24px;
+}
+.kicker,
+.hint,
+label,
+.result-count {
+  font:
+    500 11px/1.4 "DM Mono",
+    monospace;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+.kicker {
+  color: var(--accent);
+  margin: 0 0 20px;
+}
+h1 {
+  font-size: clamp(48px, 8vw, 86px);
+  line-height: 0.94;
+  letter-spacing: -0.04em;
+  margin: 0;
+  font-weight: 600;
+}
+h1 em {
+  color: var(--green);
+  font-family: "Playfair Display", serif;
+  letter-spacing: -0.06em;
+}
+.intro {
+  color: var(--muted);
+  max-width: 440px;
+  margin: 26px 0 0;
+  font-size: 17px;
+  line-height: 1.55;
+}
+.search-panel {
+  margin: 68px 0 48px;
+  padding: 24px;
+  background: var(--card);
+  border: 1px solid var(--line);
+  box-shadow: 8px 8px 0 rgba(51, 91, 75, 0.12);
+}
+label {
+  display: block;
+  color: var(--green);
+  margin-bottom: 12px;
+}
+.search-row {
+  display: flex;
+  gap: 12px;
+}
+input {
+  min-width: 0;
+  flex: 1;
+  border: 0;
+  border-bottom: 2px solid var(--ink);
+  background: transparent;
+  padding: 12px 2px;
+  color: var(--ink);
+  font:
+    19px "Space Grotesk",
+    sans-serif;
+  outline: none;
+}
+input:focus {
+  border-color: var(--accent);
+}
+button {
+  border: 0;
+  background: var(--ink);
+  color: var(--paper);
+  padding: 0 22px;
+  font:
+    600 14px "Space Grotesk",
+    sans-serif;
+  cursor: pointer;
+  transition:
+    background 0.2s,
+    transform 0.2s;
+}
+button:hover {
+  background: var(--accent);
+  transform: translateY(-2px);
+}
+button span {
+  color: #f4a18b;
+  margin-left: 12px;
+  font-size: 18px;
+}
+.hint {
+  color: var(--muted);
+  margin: 17px 0 0;
+  text-transform: none;
+  letter-spacing: 0;
+}
+kbd {
+  border: 1px solid var(--line);
+  padding: 2px 5px;
+  background: var(--paper);
+}
+.results-heading {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 14px;
+}
+h2 {
+  font:
+    600 23px "Playfair Display",
+    serif;
+  margin: 0;
+}
+.result-count {
+  color: var(--muted);
+}
+.results-list {
+  display: grid;
+  gap: 14px;
+  padding-top: 18px;
+}
+.result {
+  background: var(--card);
+  border: 1px solid var(--line);
+  padding: 23px 25px;
+  animation: rise 0.35s both;
+}
+.result-top {
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  align-items: start;
+}
+.result h3 {
+  margin: 0;
+  font-size: 21px;
+  font-weight: 600;
+}
+.result-id {
+  color: var(--accent);
+  font:
+    11px "DM Mono",
+    monospace;
+  text-transform: uppercase;
+}
+.result p {
+  color: #4f5a54;
+  line-height: 1.6;
+  max-width: 760px;
+  margin: 12px 0 0;
+}
+.score {
+  color: var(--green);
+  font:
+    11px "DM Mono",
+    monospace;
+  white-space: nowrap;
+}
+.phrase {
+  display: inline-block;
+  color: var(--accent);
+  font:
+    11px "DM Mono",
+    monospace;
+  margin-top: 14px;
+}
+.empty-state {
+  color: var(--muted);
+  min-height: 150px;
+  display: grid;
+  place-items: center;
+  border: 1px dashed var(--line);
+  text-align: center;
+}
+.empty-mark {
+  display: block;
+  color: var(--accent);
+  font:
+    36px "Playfair Display",
+    serif;
+}
+.empty-state p {
+  margin: -38px 0 0;
+}
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@media (max-width: 600px) {
+  .shell {
+    padding: 36px 18px 60px;
+  }
+  .search-panel {
+    margin-top: 46px;
+    padding: 18px;
+  }
+  .search-row {
+    display: block;
+  }
+  button {
+    width: 100%;
+    margin-top: 16px;
+    height: 48px;
+  }
+  .result-top {
+    display: block;
+  }
+  .score {
+    display: block;
+    margin-top: 10px;
+  }
+}
