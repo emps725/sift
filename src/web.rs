@@ -52,25 +52,85 @@ fn build_response(request: &str, documents: &[Document], index: &InvertedIndex) 
         .unwrap_or("/");
 
     if target == "/" {
-        return html_response(search_page("", &[], documents));
+        return asset_response(
+            "200 OK",
+            "text/html; charset=utf-8",
+            include_str!("../web/index.html"),
+        );
+    }
+
+    if target == "/styles.css" {
+        return asset_response(
+            "200 OK",
+            "text/css; charset=utf-8",
+            include_str!("../web/styles.css"),
+        );
+    }
+
+    if target == "/app.js" {
+        return asset_response(
+            "200 OK",
+            "application/javascript; charset=utf-8",
+            include_str!("../web/app.js"),
+        );
+    }
+
+    if let Some(query_string) = target.strip_prefix("/api/search?") {
+        let query = parameter(query_string, "q").unwrap_or_default();
+        let ranked_results = search_results(index, documents, &query);
+
+        return asset_response("200 OK", "application/json; charset=utf-8", &ranked_results);
     }
 
     if let Some(query_string) = target.strip_prefix("/search?") {
         let query = parameter(query_string, "q").unwrap_or_default();
-        let operator = Operator::And;
-        let matching_documents = search(index, &query, operator);
-        let ranked_results = rank(index, &query)
-            .into_iter()
-            .filter(|result| matching_documents.contains(&result.document_id))
-            .collect::<Vec<_>>();
-
-        return html_response(search_page(&query, &ranked_results, documents));
+        let page = include_str!("../web/index.html").replace(
+            "<body>",
+            &format!(
+                "<body data-initial-query=\"{}\">",
+                escape_html_attribute(&query)
+            ),
+        );
+        return asset_response("200 OK", "text/html; charset=utf-8", &page);
     }
 
     html_response_with_status(
         "404 Not Found",
         "<main><h1>404</h1><p>Page not found.</p></main>",
     )
+}
+
+fn search_results(index: &InvertedIndex, documents: &[Document], query: &str) -> String {
+    let matching_documents = search(index, query, Operator::And);
+    let ranked_results = rank(index, query)
+        .into_iter()
+        .filter(|result| matching_documents.contains(&result.document_id))
+        .collect::<Vec<_>>();
+    let mut results = String::from("{\"query\":");
+    results.push_str(&format!("\"{}\",", json_escape(query)));
+    results.push_str("\"results\":[");
+
+    for (position, result) in ranked_results.iter().enumerate() {
+        if let Some(document) = documents
+            .iter()
+            .find(|document| document.id == result.document_id)
+        {
+            if position > 0 {
+                results.push(',');
+            }
+
+            results.push_str(&format!(
+                "{{\"title\":\"{}\",\"name\":\"{}\",\"snippet\":\"{}\",\"score\":{:.6}}}",
+                json_escape(&document.title),
+                json_escape(&document.name),
+                json_escape(&make_snippet(document, query, 30)),
+                result.score
+            ));
+        }
+    }
+
+    results.push_str("]}");
+    results
 }
 
 fn parameter(query: &str, name: &str) -> Option<String> {
@@ -134,71 +194,33 @@ fn escape_html(value: &str) -> String {
         .collect()
 }
 
-fn search_page(
-    query: &str,
-    ranked_results: &[crate::ranking::ScoredDocument],
-    documents: &[Document],
-) -> String {
-    let escaped_query = escape_html(query);
-    let mut results = String::new();
-
-    if !query.trim().is_empty() {
-        results.push_str(&format!(
-            "<p class=\"summary\">{} result(s)</p>",
-            ranked_results.len()
-        ));
-
-        for (position, result) in ranked_results.iter().enumerate() {
-            if let Some(document) = documents
-                .iter()
-                .find(|document| document.id == result.document_id)
-            {
-                results.push_str(&format!(
-                    "<article><h2>{}. {}</h2><p class=\"score\">Score: {:.3}</p><p>{}</p></article>",
-                    position + 1,
-                    escape_html(&document.name),
-                    result.score,
-                    escape_html(&make_snippet(document, query, 30))
-                ));
-            }
-        }
-    }
-
-    format!(
-        r#"<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Rust Search</title>
-  <style>
-    body {{ margin: 0; font-family: system-ui, sans-serif; background: #f7f8fa; color: #202124; }}
-    main {{ max-width: 760px; margin: 48px auto; padding: 0 20px; }}
-    h1 {{ margin-bottom: 24px; }}
-    form {{ display: flex; gap: 8px; margin-bottom: 24px; }}
-    input {{ flex: 1; min-width: 160px; padding: 12px; font-size: 16px; }}
-    button {{ padding: 12px; font-size: 16px; }}
-    article {{ background: white; border-radius: 8px; padding: 16px; margin: 12px 0; }}
-    article h2 {{ margin: 0 0 8px; font-size: 18px; }}
-    .score {{ color: #666; font-size: 13px; }}
-  </style>
-</head>
-<body>
-  <main>
-    <h1>Rust Search</h1>
-    <form action="/search" method="get">
-      <input name="q" value="{escaped_query}" placeholder="Search the local corpus" autofocus>
-      <button type="submit">Search</button>
-    </form>
-    {results}
-  </main>
-</body>
-</html>"#,
-    )
+fn escape_html_attribute(value: &str) -> String {
+    escape_html(value)
 }
 
-fn html_response(body: String) -> String {
-    html_response_with_status("200 OK", &body)
+fn json_escape(value: &str) -> String {
+    let mut escaped = String::new();
+    for character in value.chars() {
+        match character {
+            '"' => escaped.push_str("\\\""),
+            '\\' => escaped.push_str("\\\\"),
+            '\n' => escaped.push_str("\\n"),
+            '\r' => escaped.push_str("\\r"),
+            '\t' => escaped.push_str("\\t"),
+            character if character.is_control() => {
+                escaped.push_str(&format!("\\u{:04x}", character as u32));
+            }
+            character => escaped.push(character),
+        }
+    }
+    escaped
+}
+
+fn asset_response(status: &str, content_type: &str, body: &str) -> String {
+    format!(
+        "HTTP/1.1 {status}\r\nContent-Type: {content_type}\r\nContent-Length: {}\r\nConnection: close\r\n\r\n{body}",
+        body.len()
+    )
 }
 
 fn html_response_with_status(status: &str, body: &str) -> String {
@@ -210,7 +232,8 @@ fn html_response_with_status(status: &str, body: &str) -> String {
 
 #[cfg(test)]
 mod tests {
-    use super::{escape_html, parameter, search_page, url_decode};
+    use super::{escape_html, json_escape, parameter, search_results, url_decode};
+    use crate::{document::Document, index::InvertedIndex};
 
     #[test]
     fn decodes_plus_and_percent_encoded_query_values() {
@@ -236,9 +259,30 @@ mod tests {
 
     #[test]
     fn frontend_has_no_operator_selection() {
-        let page = search_page("", &[], &[]);
-
+        let page = include_str!("../web/index.html");
         assert!(!page.contains("<select"));
-        assert!(page.contains("action=\"/search\""));
+        assert!(page.contains("id=\"search-form\""));
+    }
+
+    #[test]
+    fn json_escape_handles_quotes_and_control_characters() {
+        assert_eq!(json_escape("a \"quote\"\n"), "a \\\"quote\\\"\\n");
+    }
+
+    #[test]
+    fn api_returns_serialized_results() {
+        let documents = [Document {
+            id: 0,
+            name: "document.txt".to_string(),
+            title: "Rust Search".to_string(),
+            url: None,
+            text: "rust search".to_string(),
+            tokens: vec!["rust".to_string(), "search".to_string()],
+        }];
+        let index = InvertedIndex::from_documents(&documents);
+
+        let response = search_results(&index, &documents, "rust");
+        assert!(response.contains("\"title\":\"Rust Search\""));
+        assert!(response.contains("\"results\":["));
     }
 }

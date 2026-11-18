@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111827">
+  <title>Sift Search</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+
+<body>
+  <main class="shell">
+    <header class="brand" aria-label="Sift Search">
+      <span>Sift</span>
+    </header>
+
+    <section class="search-panel" aria-label="Search">
+      <h1>What do you want to find?</h1>
+      <form id="search-form" role="search">
+        <label class="search-box" for="search-input">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M10.5 18a7.5 7.5 0 1 1 0-15 7.5 7.5 0 0 1 0 15Zm0-2a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11Zm5.94.94 4.28 4.28-1.42 1.42-4.28-4.28 1.42-1.42Z" />
+          </svg>
+          <input id="search-input" name="q" type="search" autocomplete="off" placeholder="Search the local corpus">
+          <button type="submit" aria-label="Search">
+            <span>Search</span>
+            <span aria-hidden="true">&rarr;</span>
+          </button>
+        </label>
+      </form>
+    </section>
+
+    <section id="status" class="status" aria-live="polite"></section>
+    <section id="results" class="results" aria-label="Search results"></section>
+  </main>
+
+  <script src="/app.js" defer></script>
+</body>
+
+</html>
