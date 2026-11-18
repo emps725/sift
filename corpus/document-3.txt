@@ -1,0 +1,2 @@
+Local text files make a small corpus for experiments.
+The corpus is easy to inspect while learning.

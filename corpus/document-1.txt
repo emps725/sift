@@ -1,0 +1,2 @@
+Rust is a systems programming language.
+This project uses Rust to learn search engines.
